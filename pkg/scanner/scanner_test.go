@@ -123,7 +123,10 @@ func TestScanDirectorySkipsBinaryFiles(t *testing.T) {
 
 	// Create a .git directory that should be skipped
 	gitDir := filepath.Join(tmpDir, ".git")
-	os.MkdirAll(gitDir, 0755)
+
+	if err := os.MkdirAll(gitDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 	writeFile(t, filepath.Join(gitDir, "config"),
 		`AKIAIOSFODNN7EXAMPLE`)
 
