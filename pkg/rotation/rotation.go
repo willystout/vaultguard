@@ -48,8 +48,16 @@ func CheckManifest(manifestPath string, now time.Time) ([]Finding, error) {
 		var dueDate = s.LastRotated.AddDate(0, 0, s.RotationDays)
 		var daysOverdue = int(now.Sub(dueDate).Hours() / 24)
 		var severity string
+		// Severity policy: healthy ≤ -7 days, due_soon -6..0, overdue 1..7, critical ≥ 8
 		switch {
-			case daysOverdue
+		case daysOverdue <= -7:
+			severity = "healthy"
+		case daysOverdue <= 0:
+			severity = "due_soon"
+		case daysOverdue <= 7:
+			severity = "overdue"
+		default:
+			severity = "critical"
 		}
 		findings = append(findings, Finding{
 			Name:         s.Name,
@@ -57,6 +65,8 @@ func CheckManifest(manifestPath string, now time.Time) ([]Finding, error) {
 			Owner:        s.Owner,
 			LastRotated:  s.LastRotated,
 			RotationDays: s.RotationDays,
+			DaysOverdue:  daysOverdue,
+			Severity:     severity,
 		})
 	}
 
